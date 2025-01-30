@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { Card, CardContent } from "./ui/card";
 import { useQuery } from "@tanstack/react-query";
+import historicalDates from "../data/christian-dates.json";
 
 const HistoricalDate = () => {
   const today = new Date();
@@ -12,10 +13,9 @@ const HistoricalDate = () => {
   const { data: historicalEvent, isLoading } = useQuery({
     queryKey: ["historicalEvent", month, day],
     queryFn: async () => {
-      const response = await fetch(`https://raw.githubusercontent.com/parveen232/christian-dates/main/dates.json`);
-      const data = await response.json();
       const monthDayKey = `${month}/${day}`;
-      return data[monthDayKey] || "No historical event recorded for this day.";
+      return historicalDates[monthDayKey as keyof typeof historicalDates] || 
+             "No historical event recorded for this day.";
     },
   });
 
