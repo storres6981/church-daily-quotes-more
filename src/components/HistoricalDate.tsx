@@ -31,7 +31,6 @@ const HistoricalDate = () => {
         )}
       </CardContent>
     </Card>
-  </div>
   );
 };
 
