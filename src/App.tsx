@@ -12,16 +12,16 @@ const queryClient = new QueryClient();
 const App = () => (
   <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+      <BrowserRouter>
+        <TooltipProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   </GoogleOAuthProvider>
 );
