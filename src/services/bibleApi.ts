@@ -35,9 +35,10 @@ export const fetchVerses = async (
     }
 
     console.log('Fetching verses with API key:', 'Present');
-    // Fixed URL construction to match API requirements
+    // Format bookId to uppercase for API requirements
+    const formattedBookId = bookId.toUpperCase();
     const response = await fetch(
-      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${bookId}.${chapter}`,
+      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${formattedBookId}.${chapter}`,
       {
         headers: {
           'api-key': apiKey,
