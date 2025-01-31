@@ -35,8 +35,9 @@ export const fetchVerses = async (
     }
 
     console.log('Fetching verses with API key:', 'Present');
+    // Fixed URL construction to match API requirements
     const response = await fetch(
-      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${bookId}.${chapter}/verses`,
+      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${bookId}.${chapter}`,
       {
         headers: {
           'api-key': apiKey,
