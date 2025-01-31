@@ -1,7 +1,7 @@
 import { BibleVerse } from "@/types/bible";
 
 const API_URL = "https://api.scripture.api.bible/v1";
-const API_KEY = "YOUR_API_KEY"; // We'll handle this securely
+const API_KEY = import.meta.env.VITE_BIBLE_API_KEY;
 
 interface BibleApiResponse {
   data: {
@@ -22,17 +22,20 @@ export const fetchVerses = async (
   chapter: number
 ): Promise<BibleVerse[]> => {
   try {
+    console.log('Fetching verses with API key:', API_KEY ? 'Present' : 'Missing');
     const response = await fetch(
       `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${bookId}.${chapter}/verses`,
       {
         headers: {
-          "api-key": API_KEY,
+          'api-key': API_KEY || '',
         },
       }
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch Bible verses");
+      const errorData = await response.json();
+      console.error('API Error:', errorData);
+      throw new Error(errorData.message || 'Failed to fetch Bible verses');
     }
 
     const data: BibleApiResponse = await response.json();
