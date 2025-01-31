@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
+import Bible from "./pages/Bible";
 import NotFound from "./pages/NotFound";
 import Navigation from "./components/Navigation";
 
@@ -20,6 +21,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/bible" element={<Bible />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Navigation />
