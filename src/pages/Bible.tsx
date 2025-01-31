@@ -1,21 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { BookOpen, Search, Bookmark, Star } from "lucide-react";
 import { bibleBooks } from "@/data/bible-books";
+import { fetchVerses } from "@/services/bibleApi";
 import type { BibleBook, BibleVerse, SavedQuote } from "@/types/bible";
 
 const Bible = () => {
   const { toast } = useToast();
   const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+  const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadVerses = async () => {
+      if (selectedBook && selectedChapter) {
+        setLoading(true);
+        try {
+          const fetchedVerses = await fetchVerses(selectedBook.id, selectedChapter);
+          setVerses(fetchedVerses);
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to load Bible verses. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadVerses();
+  }, [selectedBook, selectedChapter, toast]);
 
   const handleSaveQuote = (verse: BibleVerse) => {
     const newQuote: SavedQuote = {
@@ -89,26 +114,26 @@ const Bible = () => {
                     {selectedChapter && (
                       <div className="space-y-4">
                         <h3 className="text-xl font-semibold">Chapter {selectedChapter}</h3>
-                        <div className="space-y-2">
-                          {/* Placeholder for actual verse content */}
-                          <div className="group flex items-start gap-2 p-2 hover:bg-accent rounded-md">
-                            <span className="text-sm text-muted-foreground">1</span>
-                            <p className="flex-1">In the beginning God created the heaven and the earth.</p>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="opacity-0 group-hover:opacity-100"
-                              onClick={() => handleSaveQuote({
-                                book: selectedBook.name,
-                                chapter: selectedChapter,
-                                verse: 1,
-                                text: "In the beginning God created the heaven and the earth."
-                              })}
-                            >
-                              <Star className="w-4 h-4" />
-                            </Button>
+                        {loading ? (
+                          <div className="text-center py-8">Loading verses...</div>
+                        ) : (
+                          <div className="space-y-2">
+                            {verses.map((verse) => (
+                              <div key={verse.verse} className="group flex items-start gap-2 p-2 hover:bg-accent rounded-md">
+                                <span className="text-sm text-muted-foreground">{verse.verse}</span>
+                                <p className="flex-1">{verse.text}</p>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="opacity-0 group-hover:opacity-100"
+                                  onClick={() => handleSaveQuote(verse)}
+                                >
+                                  <Star className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>
