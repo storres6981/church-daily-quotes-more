@@ -1,7 +1,10 @@
 import { BibleVerse } from "@/types/bible";
 
 const API_URL = "https://api.scripture.api.bible/v1";
-const API_KEY = import.meta.env.VITE_BIBLE_API_KEY;
+const STORAGE_KEY = "BIBLE_API_KEY";
+
+const getApiKey = () => localStorage.getItem(STORAGE_KEY);
+const setApiKey = (key: string) => localStorage.setItem(STORAGE_KEY, key);
 
 interface BibleApiResponse {
   data: {
@@ -17,17 +20,26 @@ interface BibleApiResponse {
   };
 }
 
+export const initializeBibleApi = (apiKey: string) => {
+  setApiKey(apiKey);
+};
+
 export const fetchVerses = async (
   bookId: string,
   chapter: number
 ): Promise<BibleVerse[]> => {
   try {
-    console.log('Fetching verses with API key:', API_KEY ? 'Present' : 'Missing');
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      throw new Error("API key not found. Please set your API key first.");
+    }
+
+    console.log('Fetching verses with API key:', 'Present');
     const response = await fetch(
       `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${bookId}.${chapter}/verses`,
       {
         headers: {
-          'api-key': API_KEY || '',
+          'api-key': apiKey,
         },
       }
     );
