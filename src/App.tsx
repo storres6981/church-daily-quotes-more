@@ -7,6 +7,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Bible from "./pages/Bible";
+import Churches from "./pages/Churches";
 import NotFound from "./pages/NotFound";
 import Navigation from "./components/Navigation";
 
@@ -22,6 +23,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/bible" element={<Bible />} />
+              <Route path="/churches" element={<Churches />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Navigation />
