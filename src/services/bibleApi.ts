@@ -1,4 +1,5 @@
 import { BibleVerse } from "@/types/bible";
+import { bibleBooks } from "@/data/bible-books";
 
 const API_URL = "https://api.scripture.api.bible/v1";
 const STORAGE_KEY = "BIBLE_API_KEY";
@@ -35,10 +36,15 @@ export const fetchVerses = async (
     }
 
     console.log('Fetching verses with API key:', 'Present');
-    // Format bookId to uppercase for API requirements
-    const formattedBookId = bookId.toUpperCase();
+    
+    // Find the book and get its API code
+    const book = bibleBooks.find(b => b.id === bookId);
+    if (!book) {
+      throw new Error(`Book ${bookId} not found`);
+    }
+
     const response = await fetch(
-      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${formattedBookId}.${chapter}`,
+      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${book.apiCode}.${chapter}`,
       {
         headers: {
           'api-key': apiKey,
