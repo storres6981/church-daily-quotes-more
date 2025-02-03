@@ -23,7 +23,7 @@ export const fetchVerses = async (bookId: string, chapter: number): Promise<Bibl
     }
 
     const response = await fetch(
-      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${book.apiCode}.${chapter}`,
+      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${book.apiCode}.${chapter}/verses`,
       {
         headers: {
           'api-key': apiKey,
@@ -32,15 +32,24 @@ export const fetchVerses = async (bookId: string, chapter: number): Promise<Bibl
     );
 
     if (!response.ok) {
-      throw new Error(`Error fetching Bible verses: ${await response.text()}`);
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`Error fetching Bible verses: ${errorText}`);
     }
 
     const data = await response.json();
-    return data.data.verses.map((verse: any) => ({
+    console.log('API Response:', data);
+
+    if (!data.data || !Array.isArray(data.data)) {
+      console.error('Unexpected API response structure:', data);
+      throw new Error('Invalid API response structure');
+    }
+
+    return data.data.map((verse: any) => ({
       book: book.name,
       chapter,
-      verse: verse.number,
-      text: verse.text
+      verse: parseInt(verse.verseId.split('.')[2]),
+      text: verse.content
     }));
   } catch (error) {
     console.error('Error fetching Bible verses:', error);
