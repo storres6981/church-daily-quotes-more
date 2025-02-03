@@ -4,40 +4,19 @@ import { bibleBooks } from "@/data/bible-books";
 const API_URL = "https://api.scripture.api.bible/v1";
 const STORAGE_KEY = "BIBLE_API_KEY";
 
-const getApiKey = () => localStorage.getItem(STORAGE_KEY);
-const setApiKey = (key: string) => localStorage.setItem(STORAGE_KEY, key);
-
-interface BibleApiResponse {
-  data: {
-    content: string;
-    verses: {
-      id: string;
-      orgId: string;
-      bookId: string;
-      chapterIds: string[];
-      reference: string;
-      text: string;
-    }[];
-  };
-}
-
 export const initializeBibleApi = (apiKey: string) => {
-  setApiKey(apiKey);
+  localStorage.setItem(STORAGE_KEY, apiKey);
 };
 
-export const fetchVerses = async (
-  bookId: string,
-  chapter: number
-): Promise<BibleVerse[]> => {
+export const fetchVerses = async (bookId: string, chapter: number): Promise<BibleVerse[]> => {
   try {
-    const apiKey = getApiKey();
+    const apiKey = localStorage.getItem(STORAGE_KEY);
     if (!apiKey) {
-      throw new Error("API key not found. Please set your API key first.");
+      throw new Error("API key not found");
     }
 
     console.log('Fetching verses with API key:', 'Present');
     
-    // Find the book and get its API code
     const book = bibleBooks.find(b => b.id === bookId);
     if (!book) {
       throw new Error(`Book ${bookId} not found`);
@@ -53,21 +32,51 @@ export const fetchVerses = async (
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('API Error:', errorData);
-      throw new Error(errorData.message || 'Failed to fetch Bible verses');
+      throw new Error(`Error fetching Bible verses: ${await response.text()}`);
     }
 
-    const data: BibleApiResponse = await response.json();
-    
-    return data.data.verses.map((verse) => ({
-      book: verse.reference.split(" ")[0],
-      chapter: chapter,
-      verse: parseInt(verse.reference.split(":")[1]),
-      text: verse.text,
+    const data = await response.json();
+    return data.data.verses.map((verse: any) => ({
+      book: book.name,
+      chapter,
+      verse: verse.number,
+      text: verse.text
     }));
   } catch (error) {
-    console.error("Error fetching Bible verses:", error);
+    console.error('Error fetching Bible verses:', error);
+    throw error;
+  }
+};
+
+export const searchBible = async (query: string): Promise<BibleVerse[]> => {
+  try {
+    const apiKey = localStorage.getItem(STORAGE_KEY);
+    if (!apiKey) {
+      throw new Error("API key not found");
+    }
+
+    const response = await fetch(
+      `${API_URL}/bibles/de4e12af7f28f599-02/search?query=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          'api-key': apiKey,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error searching Bible: ${await response.text()}`);
+    }
+
+    const data = await response.json();
+    return data.data.verses.map((verse: any) => ({
+      book: verse.reference,
+      chapter: parseInt(verse.chapterNumber),
+      verse: parseInt(verse.verseNumber),
+      text: verse.text
+    }));
+  } catch (error) {
+    console.error('Error searching Bible:', error);
     throw error;
   }
 };
