@@ -46,20 +46,28 @@ export const fetchVerses = async (bookId: string, chapter: number): Promise<Bibl
       throw new Error('Invalid API response structure');
     }
 
-    // Split the content into verses and format them
-    const content = data.data.content;
-    const verseRegex = /(\d+)\s+(.+?)(?=\s*\d+\s+|$)/g;
-    const verses: BibleVerse[] = [];
-    let match;
+    // Create a temporary div to parse HTML content
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = data.data.content;
 
-    while ((match = verseRegex.exec(content)) !== null) {
-      verses.push({
-        book: book.name,
-        chapter,
-        verse: parseInt(match[1]),
-        text: match[2].trim()
-      });
-    }
+    // Get all verse elements
+    const verseElements = tempDiv.querySelectorAll('[data-sid]');
+    const verses: BibleVerse[] = [];
+
+    verseElements.forEach((element) => {
+      const verseId = element.getAttribute('data-sid');
+      if (verseId) {
+        const verseNumber = parseInt(verseId.split(' ')[1].split(':')[1]);
+        const verseText = element.textContent || '';
+        
+        verses.push({
+          book: book.name,
+          chapter,
+          verse: verseNumber,
+          text: verseText.replace(/^\d+\s*/, '').trim() // Remove verse number from start of text
+        });
+      }
+    });
 
     return verses;
   } catch (error) {
