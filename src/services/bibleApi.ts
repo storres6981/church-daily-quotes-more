@@ -22,8 +22,9 @@ export const fetchVerses = async (bookId: string, chapter: number): Promise<Bibl
       throw new Error(`Book ${bookId} not found`);
     }
 
+    // First, fetch the chapter content
     const response = await fetch(
-      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${book.apiCode}.${chapter}/verses`,
+      `${API_URL}/bibles/de4e12af7f28f599-02/chapters/${book.apiCode}.${chapter}`,
       {
         headers: {
           'api-key': apiKey,
@@ -40,17 +41,27 @@ export const fetchVerses = async (bookId: string, chapter: number): Promise<Bibl
     const data = await response.json();
     console.log('API Response:', data);
 
-    if (!data.data || !Array.isArray(data.data)) {
+    if (!data.data || !data.data.content) {
       console.error('Unexpected API response structure:', data);
       throw new Error('Invalid API response structure');
     }
 
-    return data.data.map((verse: any) => ({
-      book: book.name,
-      chapter,
-      verse: parseInt(verse.verseId.split('.')[2]),
-      text: verse.content
-    }));
+    // Split the content into verses and format them
+    const content = data.data.content;
+    const verseRegex = /(\d+)\s+(.+?)(?=\s*\d+\s+|$)/g;
+    const verses: BibleVerse[] = [];
+    let match;
+
+    while ((match = verseRegex.exec(content)) !== null) {
+      verses.push({
+        book: book.name,
+        chapter,
+        verse: parseInt(match[1]),
+        text: match[2].trim()
+      });
+    }
+
+    return verses;
   } catch (error) {
     console.error('Error fetching Bible verses:', error);
     throw error;
