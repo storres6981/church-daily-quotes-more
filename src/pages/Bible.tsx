@@ -1,37 +1,24 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Search, Bookmark, Star } from "lucide-react";
+import { BookOpen, Search, Bookmark } from "lucide-react";
 import { bibleBooks } from "@/data/bible-books";
-import { fetchVerses, initializeBibleApi } from "@/services/bibleApi";
+import { fetchVerses } from "@/services/bibleApi";
 import type { BibleBook, BibleVerse, SavedQuote } from "@/types/bible";
+import { useToast } from "@/hooks/use-toast";
+import BibleReader from "@/components/bible/BibleReader";
+import BibleSearch from "@/components/bible/BibleSearch";
+import BookList from "@/components/bible/BookList";
 
 const Bible = () => {
   const { toast } = useToast();
   const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [verses, setVerses] = useState<BibleVerse[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
   const [loading, setLoading] = useState(false);
   const [showApiKeyInput, setShowApiKeyInput] = useState(!localStorage.getItem("BIBLE_API_KEY"));
   const [apiKey, setApiKey] = useState("");
-
-  const handleApiKeySubmit = () => {
-    if (apiKey.trim()) {
-      initializeBibleApi(apiKey.trim());
-      setShowApiKeyInput(false);
-      toast({
-        title: "Success",
-        description: "API key has been saved.",
-      });
-    }
-  };
 
   useEffect(() => {
     const loadVerses = async () => {
@@ -65,10 +52,6 @@ const Bible = () => {
       timestamp: new Date(),
     };
     setSavedQuotes([...savedQuotes, newQuote]);
-    toast({
-      title: "Quote saved",
-      description: "The quote has been added to your bookmarks.",
-    });
   };
 
   return (
@@ -113,94 +96,24 @@ const Bible = () => {
           <TabsContent value="read">
             <Card className="p-6">
               <div className="grid md:grid-cols-12 gap-6">
-                <div className="md:col-span-3">
-                  <h3 className="font-semibold mb-4">Select a Book</h3>
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-1">
-                      {bibleBooks.map((book) => (
-                        <Button
-                          key={book.id}
-                          variant={selectedBook?.id === book.id ? "secondary" : "ghost"}
-                          className="w-full justify-start"
-                          onClick={() => setSelectedBook(book)}
-                        >
-                          {book.name}
-                        </Button>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-                
-                <div className="md:col-span-9">
-                  {selectedBook ? (
-                    <div className="space-y-4">
-                      <h2 className="text-2xl font-semibold">{selectedBook.name}</h2>
-                      <div className="flex gap-2 flex-wrap">
-                        {Array.from({ length: selectedBook.chapters }, (_, i) => (
-                          <Button
-                            key={i}
-                            variant={selectedChapter === i + 1 ? "secondary" : "outline"}
-                            onClick={() => setSelectedChapter(i + 1)}
-                          >
-                            {i + 1}
-                          </Button>
-                        ))}
-                      </div>
-                      {selectedChapter && (
-                        <div className="space-y-4">
-                          <h3 className="text-xl font-semibold">Chapter {selectedChapter}</h3>
-                          {loading ? (
-                            <div className="text-center py-8">Loading verses...</div>
-                          ) : (
-                            <div className="space-y-2">
-                              {verses.map((verse) => (
-                                <div key={verse.verse} className="group flex items-start gap-2 p-2 hover:bg-accent rounded-md">
-                                  <span className="text-sm text-muted-foreground">{verse.verse}</span>
-                                  <p className="flex-1">{verse.text}</p>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="opacity-0 group-hover:opacity-100"
-                                    onClick={() => handleSaveQuote(verse)}
-                                  >
-                                    <Star className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground">
-                      Select a book to start reading
-                    </div>
-                  )}
-                </div>
+                <BookList
+                  books={bibleBooks}
+                  selectedBook={selectedBook}
+                  onSelectBook={setSelectedBook}
+                />
+                <BibleReader
+                  selectedBook={selectedBook}
+                  selectedChapter={selectedChapter}
+                  verses={verses}
+                  loading={loading}
+                  onSaveQuote={handleSaveQuote}
+                />
               </div>
             </Card>
           </TabsContent>
           
           <TabsContent value="search">
-            <Card className="p-6">
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <Input
-                    placeholder="Search the Bible..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <Button>
-                    <Search className="w-4 h-4 mr-2" />
-                    Search
-                  </Button>
-                </div>
-                <div className="text-muted-foreground text-center py-8">
-                  Enter a word or phrase to search
-                </div>
-              </div>
-            </Card>
+            <BibleSearch />
           </TabsContent>
           
           <TabsContent value="bookmarks">
