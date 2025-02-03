@@ -12,9 +12,17 @@ interface BibleReaderProps {
   verses: BibleVerse[];
   loading: boolean;
   onSaveQuote: (verse: BibleVerse) => void;
+  setSelectedChapter: (chapter: number) => void;
 }
 
-const BibleReader = ({ selectedBook, selectedChapter, verses, loading, onSaveQuote }: BibleReaderProps) => {
+const BibleReader = ({ 
+  selectedBook, 
+  selectedChapter, 
+  verses, 
+  loading, 
+  onSaveQuote,
+  setSelectedChapter 
+}: BibleReaderProps) => {
   const { toast } = useToast();
 
   const handleSaveQuote = (verse: BibleVerse) => {

@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Search, Bookmark } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { BookOpen, Search, Bookmark, Star } from "lucide-react";
 import { bibleBooks } from "@/data/bible-books";
 import { fetchVerses } from "@/services/bibleApi";
 import type { BibleBook, BibleVerse, SavedQuote } from "@/types/bible";
@@ -19,6 +22,23 @@ const Bible = () => {
   const [loading, setLoading] = useState(false);
   const [showApiKeyInput, setShowApiKeyInput] = useState(!localStorage.getItem("BIBLE_API_KEY"));
   const [apiKey, setApiKey] = useState("");
+
+  const handleApiKeySubmit = () => {
+    if (apiKey.trim()) {
+      localStorage.setItem("BIBLE_API_KEY", apiKey.trim());
+      setShowApiKeyInput(false);
+      toast({
+        title: "Success",
+        description: "API key has been saved successfully.",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Please enter a valid API key.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     const loadVerses = async () => {
@@ -107,6 +127,7 @@ const Bible = () => {
                   verses={verses}
                   loading={loading}
                   onSaveQuote={handleSaveQuote}
+                  setSelectedChapter={setSelectedChapter}
                 />
               </div>
             </Card>
