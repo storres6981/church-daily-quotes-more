@@ -25,7 +25,7 @@ const Bible = () => {
 
   const handleApiKeySubmit = () => {
     if (apiKey.trim()) {
-      localStorage.setItem("BIBLE_API_KEY", apiKey.trim());
+      localStorage.setItem("d5f2ad116bf85666d348095be4ad3e7f", apiKey.trim());
       setShowApiKeyInput(false);
       toast({
         title: "Success",
@@ -34,7 +34,7 @@ const Bible = () => {
     } else {
       toast({
         title: "Error",
-        description: "Please enter a valid API key.",
+        description: "d5f2ad116bf85666d348095be4ad3e7f",
         variant: "destructive",
       });
     }
@@ -88,7 +88,7 @@ const Bible = () => {
             <div className="flex gap-4">
               <Input
                 type="password"
-                placeholder="Enter your API key"
+                placeholder="d5f2ad116bf85666d348095be4ad3e7f"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
