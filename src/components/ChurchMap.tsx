@@ -44,12 +44,8 @@ const ChurchMap = ({ churches }: ChurchMapProps) => {
         <Marker
           position={center}
           icon={{
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 7,
-            fillColor: "#FF0000",
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: "#FFFFFF",
+            url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF0000' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='8' stroke='white' stroke-width='2'/%3E%3C/svg%3E",
+            scaledSize: new window.google.maps.Size(20, 20)
           }}
         />
 
