@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React from 'react';
+import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { useState } from 'react';
 
 interface Church {
   id: string;
@@ -15,57 +15,75 @@ interface ChurchMapProps {
 }
 
 const ChurchMap = ({ churches }: ChurchMapProps) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
+  const [selectedChurch, setSelectedChurch] = useState<Church | null>(null);
+  const [center, setCenter] = useState({ lat: 0, lng: 0 });
 
-  useEffect(() => {
-    if (!mapContainer.current) return;
-
-    // Initialize map
-    // Note: Replace with your Mapbox token
-    mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN';
-    
+  React.useEffect(() => {
+    // Get user's location
     navigator.geolocation.getCurrentPosition((position) => {
-      const { latitude, longitude } = position.coords;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current!,
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [longitude, latitude],
-        zoom: 12
-      });
-
-      // Add user location marker
-      new mapboxgl.Marker({ color: '#FF0000' })
-        .setLngLat([longitude, latitude])
-        .addTo(map.current);
-
-      // Add church markers
-      churches.forEach(church => {
-        if (church.latitude && church.longitude) {
-          const popup = new mapboxgl.Popup({ offset: 25 })
-            .setHTML(`
-              <strong>${church.name}</strong>
-              <p>${church.address}</p>
-            `);
-
-          new mapboxgl.Marker({ color: '#4B5563' })
-            .setLngLat([church.longitude, church.latitude])
-            .setPopup(popup)
-            .addTo(map.current!);
-        }
+      setCenter({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
       });
     });
+  }, []);
 
-    return () => {
-      map.current?.remove();
-    };
-  }, [churches]);
+  const mapContainerStyle = {
+    width: '100%',
+    height: '100%'
+  };
 
   return (
-    <div className="w-full h-full">
-      <div ref={mapContainer} className="w-full h-full" />
-    </div>
+    <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
+      <GoogleMap
+        mapContainerStyle={mapContainerStyle}
+        zoom={12}
+        center={center}
+      >
+        {/* User location marker */}
+        <Marker
+          position={center}
+          icon={{
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 7,
+            fillColor: "#FF0000",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#FFFFFF",
+          }}
+        />
+
+        {/* Church markers */}
+        {churches.map((church) => {
+          if (church.latitude && church.longitude) {
+            return (
+              <Marker
+                key={church.id}
+                position={{ lat: church.latitude, lng: church.longitude }}
+                onClick={() => setSelectedChurch(church)}
+              />
+            );
+          }
+          return null;
+        })}
+
+        {/* Info window for selected church */}
+        {selectedChurch && (
+          <InfoWindow
+            position={{ 
+              lat: selectedChurch.latitude!, 
+              lng: selectedChurch.longitude! 
+            }}
+            onCloseClick={() => setSelectedChurch(null)}
+          >
+            <div>
+              <h3 className="font-semibold">{selectedChurch.name}</h3>
+              <p>{selectedChurch.address}</p>
+            </div>
+          </InfoWindow>
+        )}
+      </GoogleMap>
+    </LoadScript>
   );
 };
 
