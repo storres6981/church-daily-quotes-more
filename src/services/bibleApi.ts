@@ -50,26 +50,34 @@ export const fetchVerses = async (bookId: string, chapter: number): Promise<Bibl
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = data.data.content;
 
-    // Get all verse elements
-    const verseElements = tempDiv.querySelectorAll('[data-sid]');
+    // Get all verse elements with class 'v'
+    const verseElements = tempDiv.querySelectorAll('.v');
     const verses: BibleVerse[] = [];
 
     verseElements.forEach((element) => {
-      const verseId = element.getAttribute('data-sid');
-      if (verseId) {
-        const verseNumber = parseInt(verseId.split(' ')[1].split(':')[1]);
-        const verseText = element.textContent || '';
+      const verseNumber = parseInt(element.getAttribute('data-number') || '0');
+      if (verseNumber > 0) {
+        // Get the text content of the verse and any following text nodes until the next verse
+        let verseText = '';
+        let currentNode = element.nextSibling;
         
+        while (currentNode && !(currentNode instanceof Element && currentNode.classList.contains('v'))) {
+          if (currentNode.nodeType === Node.TEXT_NODE) {
+            verseText += currentNode.textContent;
+          }
+          currentNode = currentNode.nextSibling;
+        }
+
         verses.push({
           book: book.name,
           chapter,
           verse: verseNumber,
-          text: verseText.replace(/^\d+\s*/, '').trim() // Remove verse number from start of text
+          text: verseText.trim()
         });
       }
     });
 
-    return verses;
+    return verses.sort((a, b) => a.verse - b.verse);
   } catch (error) {
     console.error('Error fetching Bible verses:', error);
     throw error;
