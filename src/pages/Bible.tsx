@@ -20,7 +20,7 @@ const Bible = () => {
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showApiKeyInput, setShowApiKeyInput] = useState(!localStorage.getItem("BIBLE_API_KEY"));
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!localStorage.getItem("d5f2ad116bf85666d348095be4ad3e7f"));
   const [apiKey, setApiKey] = useState("");
 
   const handleApiKeySubmit = () => {
