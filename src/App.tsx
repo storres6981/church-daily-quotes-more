@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Bible from "./pages/Bible";
 import Churches from "./pages/Churches";
+import Apologetics from "./pages/Apologetics";
 import NotFound from "./pages/NotFound";
 import Navigation from "./components/Navigation";
 
@@ -24,6 +25,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/bible" element={<Bible />} />
               <Route path="/churches" element={<Churches />} />
+              <Route path="/apologetics" element={<Apologetics />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Navigation />

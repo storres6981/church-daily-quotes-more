@@ -1,4 +1,4 @@
-import { Home, Book, Church, User } from 'lucide-react';
+import { Home, Book, Church, User, BookOpen } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
@@ -17,6 +17,9 @@ const Navigation = () => {
         </Link>
         <Link to="/churches" className={`${isActive('/churches') ? 'text-primary' : 'text-gray-500'}`}>
           <Church className="w-6 h-6" />
+        </Link>
+        <Link to="/apologetics" className={`${isActive('/apologetics') ? 'text-primary' : 'text-gray-500'}`}>
+          <BookOpen className="w-6 h-6" />
         </Link>
         <Link to="/profile" className={`${isActive('/profile') ? 'text-primary' : 'text-gray-500'}`}>
           <User className="w-6 h-6" />
