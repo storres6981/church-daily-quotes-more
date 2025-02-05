@@ -15,8 +15,8 @@ import BookList from "@/components/bible/BookList";
 
 const Bible = () => {
   const { toast } = useToast();
-  const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
-  const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+  const [selectedBook, setSelectedBook] = useState<BibleBook | null>(bibleBooks[0]); // Default to Genesis
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(1); // Default to chapter 1
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ const Bible = () => {
     } else {
       toast({
         title: "Error",
-        description: "d5f2ad116bf85666d348095be4ad3e7f",
+        description: "Please enter a valid API key",
         variant: "destructive",
       });
     }
