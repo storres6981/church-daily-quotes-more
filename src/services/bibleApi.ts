@@ -1,3 +1,4 @@
+
 import { BibleVerse } from "@/types/bible";
 import { bibleBooks } from "@/data/bible-books";
 
@@ -35,17 +36,24 @@ const bibleVerses: { [key: string]: { [key: number]: BibleVerse[] } } = {
 };
 
 export const fetchVerses = async (bookId: string, chapter: number): Promise<BibleVerse[]> => {
+  // Add a small delay to simulate API call
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  if (bibleVerses[bookId]?.[chapter]) {
-    return bibleVerses[bookId][chapter];
+  // Convert bookId to lowercase to ensure consistent matching
+  const lowercaseBookId = bookId.toLowerCase();
+  
+  // Check if we have the verses in our local data
+  if (bibleVerses[lowercaseBookId]?.[chapter]) {
+    return bibleVerses[lowercaseBookId][chapter];
   }
 
-  const book = bibleBooks.find(b => b.id === bookId);
+  // If verses aren't in local data, find the book and return placeholder verses
+  const book = bibleBooks.find(b => b.id.toLowerCase() === lowercaseBookId);
   if (!book) {
     throw new Error(`Book ${bookId} not found`);
   }
 
+  // Generate placeholder verses
   return Array.from({ length: 10 }, (_, i) => ({
     book: book.name,
     chapter,
