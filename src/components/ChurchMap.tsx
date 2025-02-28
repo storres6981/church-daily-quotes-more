@@ -1,6 +1,6 @@
 import React from 'react';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Church {
   id: string;
@@ -16,19 +16,30 @@ interface ChurchMapProps {
 
 const ChurchMap = ({ churches }: ChurchMapProps) => {
   const [selectedChurch, setSelectedChurch] = useState<Church | null>(null);
-  const [center, setCenter] = useState({ lat: 0, lng: 0 });
+  const [center, setCenter] = useState({ lat: 37.7749, lng: -122.4194 }); // Default to San Francisco
   const [isLoaded, setIsLoaded] = useState(false);
+  const [mapKey, setMapKey] = useState<string>('');
 
-  React.useEffect(() => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      setCenter({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      });
-    }, () => {
-      // Default to a central location if geolocation fails
-      setCenter({ lat: 37.7749, lng: -122.4194 }); // San Francisco coordinates
-    });
+  useEffect(() => {
+    // Extract API key or set to empty string if not defined
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+    setMapKey(apiKey);
+    
+    // Get user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          // Keep default center if geolocation fails
+          console.log('Geolocation permission denied or unavailable');
+        }
+      );
+    }
   }, []);
 
   const mapContainerStyle = {
@@ -40,9 +51,21 @@ const ChurchMap = ({ churches }: ChurchMapProps) => {
     setIsLoaded(true);
   };
 
+  // Only render the map if we have an API key
+  if (!mapKey) {
+    return (
+      <div className="h-full flex items-center justify-center bg-gray-100 rounded-lg">
+        <div className="text-center p-4">
+          <p className="text-muted-foreground mb-2">Google Maps API key is missing</p>
+          <p className="text-sm">Set VITE_GOOGLE_MAPS_API_KEY in your environment</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <LoadScript 
-      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+      googleMapsApiKey={mapKey}
       onLoad={onLoad}
     >
       <GoogleMap
@@ -56,7 +79,7 @@ const ChurchMap = ({ churches }: ChurchMapProps) => {
             <Marker
               position={center}
               icon={{
-                path: window.google.maps.SymbolPath.CIRCLE,
+                path: google.maps.SymbolPath.CIRCLE,
                 scale: 7,
                 fillColor: "#FF0000",
                 fillOpacity: 1,
@@ -80,11 +103,11 @@ const ChurchMap = ({ churches }: ChurchMapProps) => {
             })}
 
             {/* Info window for selected church */}
-            {selectedChurch && (
+            {selectedChurch && selectedChurch.latitude && selectedChurch.longitude && (
               <InfoWindow
                 position={{ 
-                  lat: selectedChurch.latitude!, 
-                  lng: selectedChurch.longitude! 
+                  lat: selectedChurch.latitude, 
+                  lng: selectedChurch.longitude 
                 }}
                 onCloseClick={() => setSelectedChurch(null)}
               >
